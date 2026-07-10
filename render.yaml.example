@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: tego-materials-studio
+    runtime: docker
+    plan: standard
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: TEGO_PROPERTY_DEVICE
+        value: cpu
+      - key: DGLBACKEND
+        value: pytorch
+      - key: RETRIEVAL_CSVS
+        value: /app/mp20_with_jav_dielectric/mp20_with_jav_epsx_epsy_epsz.csv
+      - key: MPLBACKEND
+        value: Agg
+      # Optional. Without this key, natural-language parsing uses local rules.
+      # - key: OPENAI_API_KEY
+      #   sync: false

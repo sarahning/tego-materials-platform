@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>璇玑Tego</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">
+        <img src="/static/assets/logo.png" alt="璇玑Tego logo" />
+      </div>
+      <div>
+        <div class="brand-title">璇玑Tego</div>
+        <div class="brand-subtitle">Property-guided crystal studio</div>
+      </div>
+    </div>
+    <nav class="topnav">
+      <button class="nav-btn" data-route="home">设计入口</button>
+      <button class="nav-btn" id="backHomeBtn">候选列表</button>
+      <button class="nav-btn" data-route="prediction">性质预测</button>
+      <button class="nav-btn muted" type="button">个人信息</button>
+      <button class="nav-btn muted" type="button">联系我们</button>
+    </nav>
+  </header>
+
+  <main class="app-shell">
+    <section id="pageHome" class="page page-active">
+      <section class="hero-card">
+        <div class="hero-grid-art"></div>
+        <div class="hero-left">
+          <div class="eyebrow">Inverse Materials Design</div>
+          <h1>输入目标性质，获得候选晶体结构</h1>
+          <p>设置六类材料性质及其权重，或输入功能描述后转换为目标参数。候选结果将在页面下方按相似度排列，并可进入结构、性质与 Wyckoff 位点页面查看。</p>
+        </div>
+        <div class="hero-right">
+          <div class="hero-crystal-stage" aria-label="Rotating crystal model">
+            <div class="stage-light"></div>
+            <div class="stage-aura"></div>
+            <iframe id="heroCrystalFrame" class="hero-crystal-frame" title="Rotating crystal preview"></iframe>
+            <div class="stage-platform">
+              <div class="platform-top"></div>
+              <div class="platform-body"></div>
+              <div class="platform-base"></div>
+            </div>
+            <div class="stage-shadow"></div>
+          </div>
+          <div class="hero-stats">
+            <div class="mini-stat">
+              <span id="candidateCountView">0</span>
+              <label>候选结构</label>
+            </div>
+            <div class="mini-stat">
+              <span id="lastTimeView">—</span>
+              <label>最近耗时</label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="design-panel">
+        <div class="panel-head">
+          <div>
+            <span class="section-kicker">Target Setting</span>
+            <h2>目标性质设置</h2>
+            <p>每个性质可设置目标值和权重；权重为 0 时，该性质不参与候选排序。</p>
+          </div>
+          <div class="topk-box">
+            <label for="topkInput">候选数量</label>
+            <input id="topkInput" type="number" min="1" max="20" value="5" />
+          </div>
+        </div>
+
+        <div id="propertyGrid" class="property-grid"></div>
+
+        <div class="function-box">
+          <div class="function-title">
+            <span>可选：功能描述问答</span>
+            <button id="parseBtn" class="ghost-btn">解析为性质参数</button>
+          </div>
+          <textarea id="functionText" placeholder="例如：我希望得到一种高磁密度、结构较硬、具有一定半导体特征的材料。"></textarea>
+        </div>
+
+        <div class="action-row">
+          <button id="generateBtn" class="primary-btn">生成结构</button>
+          <button id="clearBtn" class="secondary-btn">清空输入</button>
+          <div id="runStatus" class="run-status">等待输入</div>
+        </div>
+      </section>
+
+      <section id="loadingBox" class="loading-box hidden">
+        <div class="spinner"></div>
+        <div>
+          <strong>正在生成并渲染候选结构</strong>
+          <p>已运行 <span id="elapsedTime">0.0</span> s</p>
+        </div>
+      </section>
+
+      <section class="candidate-section">
+        <div class="section-title-row">
+          <div>
+            <span class="section-kicker">Candidate Queue</span>
+            <h2>候选结构</h2>
+            <p id="timingText">生成后将在这里展示候选列表。</p>
+          </div>
+        </div>
+        <div id="candidateList" class="candidate-list empty-state">
+          <div class="empty-card">暂无候选结构。请先设置性质并点击“生成结构”。</div>
+        </div>
+      </section>
+    </section>
+
+    <section id="pageStructure" class="page">
+      <div class="page-toolbar compact-toolbar">
+        <button class="secondary-btn compact-back" data-route="home">← 返回候选列表</button>
+        <div>
+          <span class="section-kicker">Crystal Studio</span>
+          <h2 id="structureTitle">晶体微观结构</h2>
+          <p id="structureSubtitle"></p>
+        </div>
+        <button id="structurePredictBtn" class="primary-btn prediction-toolbar-action" type="button">预测当前结构性质</button>
+      </div>
+      <div class="detail-dashboard studio-dashboard">
+        <aside class="context-sidebar">
+          <div class="profile-card">
+            <span>个人信息</span>
+            <strong>Research User</strong>
+            <p>Materials design workspace</p>
+          </div>
+          <div class="contact-card">
+            <span>联系我们</span>
+            <strong>Support</strong>
+            <p>materials-lab@example.com</p>
+          </div>
+          <div class="nav-card">
+            <span>页面导航</span>
+            <button data-route="home">候选列表</button>
+            <button id="sideOpenStructureStructure" class="active-nav">晶体微观结构</button>
+            <button id="sideOpenPropertiesStructure">晶体性质</button>
+            <button id="sideOpenWyckoffStructure">Wyckoff 位点</button>
+            <button id="sideOpenPredictionStructure">性质预测</button>
+          </div>
+        </aside>
+        <div class="detail-main studio-main">
+          <div class="studio-page-layout">
+            <aside class="studio-cif-rail">
+              <div class="studio-rail-title">
+                <span>CIF Structure</span>
+                <a id="downloadCifBtn" class="studio-download" href="#" download>下载 CIF</a>
+              </div>
+              <pre id="cifText"></pre>
+            </aside>
+            <section class="studio-viewer-panel">
+              <iframe id="viewerFrame" title="3D crystal viewer"></iframe>
+            </section>
+          </div>
+          <div id="structureBasicTable" class="hidden"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="pageProperties" class="page">
+      <div class="page-toolbar">
+        <button class="secondary-btn" data-route="home">← 返回候选列表</button>
+        <div>
+          <span class="section-kicker">Property Analysis</span>
+          <h2 id="propTitle">性质分析</h2>
+          <p id="propSubtitle"></p>
+        </div>
+      </div>
+      <div class="detail-dashboard">
+        <aside class="context-sidebar">
+          <div class="profile-card">
+            <span>个人信息</span>
+            <strong>Research User</strong>
+            <p>Materials design workspace</p>
+          </div>
+          <div class="contact-card">
+            <span>联系我们</span>
+            <strong>Support</strong>
+            <p>materials-lab@example.com</p>
+          </div>
+          <div class="nav-card">
+            <span>页面导航</span>
+            <button data-route="home">候选列表</button>
+            <button id="sideOpenStructureProperties">晶体微观结构</button>
+            <button id="sideOpenPropertiesProperties" class="active-nav">晶体性质</button>
+            <button id="sideOpenWyckoffProperties">Wyckoff 位点</button>
+            <button id="sideOpenPredictionProperties">性质预测</button>
+          </div>
+        </aside>
+        <div class="detail-main">
+          <div class="two-col-row">
+            <section class="info-card">
+              <h3>六类目标性质</h3>
+              <div id="propertyTable" class="kv-table"></div>
+            </section>
+            <section class="info-card">
+              <h3>基本结构参数</h3>
+              <div id="propertyBasicTable" class="kv-table"></div>
+            </section>
+          </div>
+          <section class="info-card plot-section">
+            <h3>数据集位置图</h3>
+            <div id="plotGrid" class="plot-grid"></div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section id="pageWyckoff" class="page">
+      <div class="page-toolbar">
+        <button class="secondary-btn" data-route="home">← 返回候选列表</button>
+        <div>
+          <span class="section-kicker">Wyckoff Rendering</span>
+          <h2 id="wyckoffTitle">Wyckoff 位点渲染</h2>
+          <p id="wyckoffSubtitle"></p>
+        </div>
+      </div>
+      <div class="detail-dashboard">
+        <aside class="context-sidebar">
+          <div class="profile-card">
+            <span>个人信息</span>
+            <strong>Research User</strong>
+            <p>Materials design workspace</p>
+          </div>
+          <div class="contact-card">
+            <span>联系我们</span>
+            <strong>Support</strong>
+            <p>materials-lab@example.com</p>
+          </div>
+          <div class="nav-card">
+            <span>页面导航</span>
+            <button data-route="home">候选列表</button>
+            <button id="sideOpenStructureWyckoff">晶体微观结构</button>
+            <button id="sideOpenPropertiesWyckoff">晶体性质</button>
+            <button id="sideOpenWyckoffWyckoff" class="active-nav">Wyckoff 位点</button>
+            <button id="sideOpenPredictionWyckoff">性质预测</button>
+          </div>
+        </aside>
+        <div class="detail-main wyckoff-main">
+          <section class="wyckoff-board">
+            <div class="info-card wyckoff-overview-card">
+              <h3>完整结构三视图</h3>
+              <div id="wyckoffFullViews" class="view-triplet compact-triplet"></div>
+            </div>
+            <div class="info-card wyckoff-table-card">
+              <h3>位点列表</h3>
+              <div id="wyckoffTable" class="wyckoff-table compact-wyckoff-table"></div>
+            </div>
+          </section>
+          <section id="wyckoffGroups" class="wyckoff-groups compact-wyckoff-groups"></section>
+        </div>
+      </div>
+    </section>
+
+    <section id="pagePrediction" class="page">
+      <div class="page-toolbar compact-toolbar prediction-page-toolbar">
+        <button class="secondary-btn compact-back" data-route="home">← 返回候选列表</button>
+        <div>
+          <span class="section-kicker">Property Intelligence</span>
+          <h2>晶体性质预测</h2>
+          <p>输入或选择晶体结构，推演磁矩密度、带隙与最大静态介电常数。</p>
+        </div>
+        <div id="predictionEngineBadge" class="engine-badge">计算引擎 · 待机</div>
+      </div>
+
+      <div class="prediction-workspace">
+        <section class="prediction-input-panel">
+          <div class="prediction-panel-head">
+            <div>
+              <span class="section-kicker">Structure Input</span>
+              <h3>晶体结构输入</h3>
+            </div>
+            <span id="predictionSourceName" class="source-chip">未选择结构</span>
+          </div>
+
+          <div class="prediction-source-actions">
+            <button id="predictionUseCandidateBtn" class="secondary-btn" type="button">使用当前候选</button>
+            <label class="file-select-btn" for="predictionFileInput">载入 CIF 文件</label>
+            <input id="predictionFileInput" type="file" accept=".cif,.txt,chemical/x-cif" />
+          </div>
+
+          <label class="prediction-field-label" for="predictionCifText">CIF 文本</label>
+          <textarea id="predictionCifText" class="prediction-cif-input" spellcheck="false" placeholder="可粘贴完整 CIF 文本，或从候选结构与本地 CIF 文件载入。"></textarea>
+
+          <div class="prediction-input-meta">
+            <span>支持有序周期晶体结构</span>
+            <span>当前结构不会自动弛豫</span>
+            <span>首次运行会加载计算引擎</span>
+          </div>
+
+          <div class="prediction-action-row">
+            <button id="predictionRunBtn" class="primary-btn" type="button">开始性质预测</button>
+            <button id="predictionClearBtn" class="secondary-btn" type="button">清空结构</button>
+          </div>
+          <div id="predictionStatus" class="prediction-status">等待晶体结构输入</div>
+        </section>
+
+        <section class="prediction-output-panel">
+          <div id="predictionEmpty" class="prediction-empty-state">
+            <div class="prediction-empty-symbol">Σ</div>
+            <strong>性质结果将在这里生成</strong>
+            <p>从候选列表进入时可直接计算；也可以载入任意 CIF 进行独立预测。</p>
+          </div>
+
+          <div id="predictionLoading" class="prediction-loading hidden">
+            <div class="spinner"></div>
+            <div>
+              <strong>正在构建晶体图并推演性质</strong>
+              <p>已运行 <span id="predictionElapsed">0.0</span> s。首次运行需要加载计算引擎。</p>
+            </div>
+          </div>
+
+          <div id="predictionResult" class="prediction-result hidden">
+            <div class="prediction-result-head">
+              <div>
+                <span class="section-kicker">Prediction Result</span>
+                <h3 id="predictionFormula">—</h3>
+                <p id="predictionMeta">—</p>
+              </div>
+              <span class="result-status-chip">预测完成</span>
+            </div>
+
+            <div class="prediction-metric-grid">
+              <article class="prediction-metric-card">
+                <div class="metric-index">01</div>
+                <span>局域绝对磁矩密度</span>
+                <strong><b id="predictionMagDensity">—</b><small> μB/Å³</small></strong>
+                <div class="metric-track"><i id="predictionMagBar"></i></div>
+                <p id="predictionMagLabel">—</p>
+              </article>
+              <article class="prediction-metric-card">
+                <div class="metric-index">02</div>
+                <span>带隙</span>
+                <strong><b id="predictionBandGap">—</b><small> eV</small></strong>
+                <div class="metric-track"><i id="predictionGapBar"></i></div>
+                <p id="predictionGapLabel">—</p>
+              </article>
+              <article class="prediction-metric-card">
+                <div class="metric-index">03</div>
+                <span>最大静态介电常数</span>
+                <strong><b id="predictionDielectric">—</b><small> ε</small></strong>
+                <div class="metric-track"><i id="predictionDielectricBar"></i></div>
+                <p id="predictionDielectricLabel">—</p>
+              </article>
+            </div>
+
+            <div class="prediction-detail-grid">
+              <section class="prediction-viewer-card">
+                <div class="prediction-card-title">
+                  <span>Structure Preview</span>
+                  <strong>输入晶胞</strong>
+                </div>
+                <iframe id="predictionViewerFrame" title="Predicted crystal structure"></iframe>
+              </section>
+
+              <section class="prediction-data-card">
+                <div class="prediction-card-title">
+                  <span>Structure Summary</span>
+                  <strong>结构与磁性细节</strong>
+                </div>
+                <div id="predictionBasicTable" class="prediction-basic-grid"></div>
+                <div class="site-moment-head">
+                  <span>逐位点磁矩大小</span>
+                  <small id="predictionSiteCount">—</small>
+                </div>
+                <div id="predictionSiteMoments" class="site-moment-list"></div>
+              </section>
+            </div>
+
+            <section class="prediction-notice-card">
+              <div>
+                <span class="section-kicker">Result Notes</span>
+                <h3>结果说明</h3>
+              </div>
+              <div id="predictionNotices" class="prediction-notices"></div>
+            </section>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

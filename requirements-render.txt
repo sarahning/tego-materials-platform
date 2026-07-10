@@ -1,0 +1,22 @@
+# Render/Linux CPU deployment dependencies.
+# PyTorch CPU is installed separately in Dockerfile before this file.
+numpy==1.26.4
+pandas==2.2.3
+packaging==24.2
+PyYAML==6.0.2
+requests==2.32.3
+
+fastapi==0.115.12
+uvicorn[standard]==0.34.2
+python-multipart==0.0.20
+openai>=1.30,<2
+
+matplotlib>=3.7,<4
+spglib>=2.3,<3
+pymatgen>=2024.1.1
+hofmann[pymatgen]
+
+torchdata==0.7.1
+dgl==2.2.1
+chgnet==0.3.8
+alignn==2026.5.20

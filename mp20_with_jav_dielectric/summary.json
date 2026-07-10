@@ -1,0 +1,13 @@
+{
+  "mp20_total_rows_loaded": 45229,
+  "matched_pairs_unique_mp20_rows": 22343,
+  "new_dataset_rows": 22343,
+  "new_dataset_columns": 25,
+  "dielectric_columns_added": [
+    "dielectric_epsx",
+    "dielectric_epsy",
+    "dielectric_epsz"
+  ],
+  "dielectric_definition": "original JAV epsx, epsy, epsz; no averaging",
+  "output_csv": "C:\\Users\\Lenovo\\Desktop\\1.15任务成果保存\\mattergen-main\\tego\\mp20_with_jav_dielectric\\mp20_with_jav_epsx_epsy_epsz.csv"
+}

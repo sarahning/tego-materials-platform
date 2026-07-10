@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+pandas==2.2.3
+numpy==1.26.4
+pymatgen
+spglib
+matplotlib
+hofmann
+python-multipart
+openai
+requests==2.32.3
+packaging==24.2
+PyYAML==6.0.2
